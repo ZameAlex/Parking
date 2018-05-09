@@ -11,7 +11,7 @@ namespace Parking
     {
         static void Main(string[] args)
         {
-            Core.Parking p = Core.Parking.Instanse;
+
         }
     }
 }
