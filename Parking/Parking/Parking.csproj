@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Core\Car.cs" />
     <Compile Include="Core\Parking.cs" />
+    <Compile Include="Core\Settings.cs" />
     <Compile Include="Core\Transaction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
