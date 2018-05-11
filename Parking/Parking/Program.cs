@@ -12,6 +12,8 @@ namespace Parking
         static void Main(string[] args)
         {
             var parking = Core.Parking.Instanse;
+            string guid;
+            parking.AddCar(CarType.Bus, out guid);
         }
     }
 }

@@ -20,7 +20,130 @@ namespace Parking.Core
         private Parking()
         {
             settings = new Settings();
+            cars = new List<Car>();
+            transactions = new List<Transaction>();
+        }
+        /// <summary>
+        /// If ParkingSpace>cars.Count, we can add car
+        /// </summary>
+        /// <param name="type">CarType</param>
+        /// <param name="Guid">Returns ID of new Car</param>
+        /// <returns>True, if car was added suceesful, false, if parking space is not enough</returns>
+        public bool AddCar(CarType type, out string Guid)
+        {
+            try
+            {
+                if (settings.ParkingSpace > cars.Count)
+                {
+                    var tempCar = new Car(type);
+                    Guid = tempCar.ID;
+                    cars.Add(tempCar);
+                    return true;
+                }
+                Guid = null;
+                return false;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Guid">ID of the target car to remove it</param>
+        /// <param name="balance">returns true, if balance is more than 0, due to know, what the reason of false</param>
+        /// <returns>True, if remove was succeded, falce, if balance is not enough</returns>
+        /// <exception>Can throw ArgumentNullException, if car was not found</exception>
+        public bool RemoveCar(string Guid)
+        {
+            try
+            {
+                var carForRemove = cars.Find(car => car.ID == Guid);
+                if (carForRemove.Balance > 0)
+                {
+                    cars.Remove(carForRemove);
+                    return true;
+                }
+                else
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        /// <summary>
+        /// Add sum to balance car
+        /// </summary>
+        /// <param name="Guid">Id of car</param>
+        /// <param name="money">Sum, what you want to add</param>
+        /// <returns></returns>
+        /// <exception>Can throw ArgumentNullException, if car was not found</exception>
+        public bool AddBalance(string Guid, double money)
+        {
+            try
+            {
+                var carForAddMoney = cars.Find(car => car.ID == Guid);
+                carForAddMoney.AddMoney(money);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
+        private void Payment()
+        {
+            foreach(var car in cars)
+            {
+                Transaction transaction;
+                car.Pay(CalculateTax(car), out transaction);
+                transactions.Add(transaction);
+            }
+        }
+
+        private double CalculateTax(Car car)
+        {
+            if (Balance < 0)
+                return settings.Fine * settings.TaxesForCarType[car.Type.ToString()];
+            return settings.TaxesForCarType[car.Type.ToString()];
+        }
+
+        public void ShowTransactions()
+        {
+            foreach(var transaction in transactions)
+            {
+                Console.WriteLine($"Date: {transaction.TransactionTime}, Car: {transaction.CarID}, Tax: {transaction.Tax}");
+            }
+        }
+
+        public void ShowPlaces()
+        {
+            Console.WriteLine($@"Places:\nTotal: { settings.ParkingSpace},
+                                Free: { settings.ParkingSpace - cars.Count},
+                                Ocupated: { cars.Count}");
+        }
+
+        public void ShowIncome(bool minute)
+        {
+            if(minute)
+                Console.WriteLine($"Total income: {Balance}");
+            else
+            {
+                Console.WriteLine($"Income for last minute: {MinuteIncomeCalculate()}");
+            }
+        }
+
+        private double MinuteIncomeCalculate()
+        {
+            double income = 0;
+            foreach (var transaction in transactions)
+            {
+                income += transaction.Tax;
+            }
+            return income;
         }
     }
 }

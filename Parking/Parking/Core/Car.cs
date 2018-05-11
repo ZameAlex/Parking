@@ -35,5 +35,12 @@ namespace Parking.Core
                 Balance += value;
         }
 
+        public void Pay(double tax,out Transaction transaction)
+        {
+            
+            Balance -= tax;
+            transaction = new Transaction(ID, tax);
+        }
+
     }
 }

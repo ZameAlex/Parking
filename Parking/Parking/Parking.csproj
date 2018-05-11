@@ -45,6 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Car.cs" />
+    <Compile Include="IO\Logger.cs" />
+    <Compile Include="IO\Menu.cs" />
     <Compile Include="Core\Parking.cs" />
     <Compile Include="Core\Settings.cs" />
     <Compile Include="Core\Transaction.cs" />
