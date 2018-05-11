@@ -15,6 +15,7 @@ namespace Parking.Core
 
         List<Car> cars;
         List<Transaction> transactions;
+        List<Transaction> transactionsForLogging;
         public double Balance { get; private set; }
 
         private Parking()
@@ -38,6 +39,7 @@ namespace Parking.Core
                     var tempCar = new Car(type);
                     Guid = tempCar.ID;
                     cars.Add(tempCar);
+
                     return true;
                 }
                 Guid = null;
