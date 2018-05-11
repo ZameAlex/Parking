@@ -10,7 +10,7 @@ namespace Parking.Core
     {
         public readonly DateTime transacionTime;
         public DateTime TransactionTime { get { return transacionTime; } }
-        public string GUID { get; protected set; }
+        public string CarID { get; protected set; }
         public double Tax { get; protected set; }
 
     }
