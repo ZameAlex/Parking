@@ -51,6 +51,23 @@ namespace Parking
         {
             Console.Clear();
             Console.WriteLine("Enter car ID");
+            var id = Console.ReadLine();
+            try
+            {
+                var result = Core.Parking.Instanse.RemoveCar(id);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine("Car didn`t find!");
+                return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Car wasn`t deleted!");
+                //logger
+                return;
+            }
+            Console.WriteLine("Car was removed succesfuly");
         }
 
         static void AddMoney()
