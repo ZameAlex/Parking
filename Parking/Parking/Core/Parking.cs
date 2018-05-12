@@ -14,7 +14,6 @@ namespace Parking.Core
         public static Parking Instanse { get { return lazy.Value; } }
 
         private readonly Settings settings;
-        Logger logger;
 
         private List<Car> cars;
         private Dictionary<Car, Timer> carTimers;
@@ -35,9 +34,8 @@ namespace Parking.Core
             transactions = new List<Transaction>();
             transactionsForLogging = new List<Transaction>();
             carTimers = new Dictionary<Car, Timer>();
-            logger = new Logger("Transactions.log");
-            logTimer = new Timer(Log, null, 60000, 60000);
-            deleteOldTransactionsTimer = new Timer(DeleteOldTransaction, null, 61000, 1000);
+            logTimer = new Timer(Log, null, settings.logTimeout*1000, settings.logTimeout*1000);
+            deleteOldTransactionsTimer = new Timer(DeleteOldTransaction, null, (settings.logTimeout+1)*1000, 1000);
         }
 
 
@@ -167,7 +165,7 @@ namespace Parking.Core
 
         public string ShowLog()
         {
-            return logger.ReadLog();
+            return Logger.ReadLog(settings.logPath);
         }
 
         public string ShowCar(string Guid)
@@ -207,7 +205,7 @@ namespace Parking.Core
             }
             catch (Exception ex)
             {
-                logger.WriteException(ex.Message, "Parking.log");
+                Logger.WriteException(ex.Message, "Parking.log");
             }
         }
 
@@ -216,7 +214,7 @@ namespace Parking.Core
             double balance=0;
             foreach (var t in transactionsForLogging)
                 balance += t.Tax;
-            logger.WriteLog(balance);
+            Logger.WriteLog(balance, settings.logPath);
         }
 
         private void DeleteOldTransaction(object obj)
@@ -233,7 +231,7 @@ namespace Parking.Core
             }
             catch (Exception ex)
             {
-                logger.WriteException(ex.Message, "Parking.log");
+                Logger.WriteException(ex.Message, "Parking.log");
             }
         }
 

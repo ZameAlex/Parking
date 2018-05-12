@@ -8,22 +8,17 @@ using System.Threading.Tasks;
 
 namespace Parking.IO
 {
-    public class Logger
+    public static class Logger
     {
-        private FileStream logFile;
-        public Logger(string fileName)
+        public static void WriteLog(double balance, string logFile)
         {
-            logFile = new FileStream(fileName, FileMode.OpenOrCreate);
-        }
-        public void WriteLog(double balance)
-        {
-            using (StreamWriter writer = new StreamWriter(logFile))
+            using (StreamWriter writer = new StreamWriter(logFile, true))
             {
                 writer.WriteLine($"{DateTime.Now.ToLongTimeString()} {balance}");
             }
         }
 
-        public string ReadLog()
+        public static string ReadLog(string logFile)
         {
             StringBuilder builder = new StringBuilder();
             using (StreamReader reader = new StreamReader(logFile))
@@ -33,15 +28,12 @@ namespace Parking.IO
             return builder.ToString();
         }
 
-        public void WriteException(string message, string fileName)
+        public static void WriteException(string message, string fileName)
         {
-            if (logFile.Name == fileName)
-                logFile.Unlock(0, logFile.Length);
             using (StreamWriter writer = new StreamWriter(fileName, true))
             {
                 writer.WriteLine($"{DateTime.Now.ToLongTimeString()}\tERR\t{message}");
             }
-            logFile.Lock(0, logFile.Length);
         }
        
     }

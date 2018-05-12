@@ -51,6 +51,7 @@
     <Compile Include="Core\Parking.cs" />
     <Compile Include="Core\Settings.cs" />
     <Compile Include="Core\Transaction.cs" />
+    <Compile Include="IO\MenuMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
