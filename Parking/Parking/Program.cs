@@ -18,8 +18,8 @@ namespace Parking
         {
             menus = new List<Menu>();
             logger = new Logger("Parking.log");
-            menus.Add(new Menu(BackSpaceMethodFirstLevel, AddCar, DeleteCar, AddMoney, ShowHistory, ShowBalance, ShowBalancePerMinute, ShowPlaces, ShowLog));
-            menus.Add(new Menu(BackSpaceMethodSecondLevel, Bus, Passenger,Motorcycle,Truck));
+            menus.Add(new Menu(BackSpaceMethodFirstLevel, AddCar, DeleteCar, ShowCar, AddMoney, ShowHistory, ShowBalance, ShowBalancePerMinute, ShowPlaces, ShowLog));
+            menus.Add(new Menu(BackSpaceMethodSecondLevel, Bus, Passenger, Motorcycle, Truck));
             Menu currentMenu = menus.First();
             currentMenu.Show();
 
@@ -55,10 +55,15 @@ namespace Parking
             try
             {
                 var result = Core.Parking.Instanse.RemoveCar(id);
+                if (result)
+                    Console.WriteLine("Car was removed succesfuly");
+                else
+                    Console.WriteLine("Sou shold add money to car!");
             }
             catch (ArgumentNullException ex)
             {
                 Console.WriteLine("Car didn`t find!");
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             catch (Exception ex)
@@ -67,7 +72,7 @@ namespace Parking
                 logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
-            Console.WriteLine("Car was removed succesfuly");
+
         }
 
         static void AddMoney()
@@ -76,20 +81,34 @@ namespace Parking
             Console.WriteLine("Enter car id");
             var id = Console.ReadLine();
             Console.WriteLine("Enter value of replenish");
-            var money = Convert.ToDouble(Console.ReadLine());
-            if (money < 0)
-            {
-                Console.WriteLine("You should enter positive number!");
-                Thread.Sleep(1500);
-                return;
-            }
             try
             {
-                var result = Core.Parking.Instanse.AddBalance(id, money);
+                var money = Convert.ToDouble(Console.ReadLine());
+                if (money < 0)
+                {
+                    Console.WriteLine("You should enter positive number!");
+                    Thread.Sleep(1500);
+                    return;
+                }
+
+                Core.Parking.Instanse.AddBalance(id, money);
+            }
+            catch(FormatException ex)
+            {
+                Console.WriteLine("Wrong format!");
+                logger.WriteException(ex.Message, "Parking.log");
+                return;
+            }
+            catch (OverflowException ex)
+            {
+                Console.WriteLine("Too big number!");
+                logger.WriteException(ex.Message, "Parking.log");
+                return;
             }
             catch (ArgumentNullException ex)
             {
                 Console.WriteLine("Car didn`t find!");
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             catch (Exception ex)
@@ -107,7 +126,7 @@ namespace Parking
             var transactions = Core.Parking.Instanse.ShowTransactions();
             foreach (var transaction in transactions)
             {
-                Console.WriteLine($"Date: {transaction.TransactionTime}, Car: {transaction.CarID}, Tax: {transaction.Tax}");
+                Console.WriteLine(transaction.ToString());
             }
         }
 
@@ -131,7 +150,38 @@ namespace Parking
         {
             Console.WriteLine(Core.Parking.Instanse.ShowLog());
         }
+
+        static void ShowCar()
+        {
+            Console.Clear();
+            Console.WriteLine("Enter car ID");
+            var guid = Console.ReadLine();
+            try
+            {
+                Console.WriteLine(Core.Parking.Instanse.ShowCar(guid));
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine("Car didn`t find!");
+                logger.WriteException(ex.Message, null);
+                return;
+            }
+            catch (NullReferenceException ex)
+            {
+                Console.WriteLine("Car didn`t find!");
+                logger.WriteException(ex.Message, null);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Car didn`t find!");
+                logger.WriteException(ex.Message, null);
+                return;
+            }
+        }
         #endregion FirstMenuLevelMethods
+
+
 
         #region SecondMenuLevelMethods
         static void Bus()
@@ -140,12 +190,12 @@ namespace Parking
             Console.WriteLine("Enter balance");
             double balance;
             var result = EnterBalance(out balance);
-            if(result)
+            if (result)
             {
                 string guid;
                 Core.Parking.Instanse.AddCar(CarType.Bus, balance, out guid);
                 Console.WriteLine("Car was added sucesfully");
-                Console.WriteLine($"Car ID: {guid}");         
+                Console.WriteLine($"Car ID: {guid}");
             }
         }
         static void Passenger()
@@ -184,12 +234,12 @@ namespace Parking
             Console.WriteLine("Enter balance");
             double balance;
             var result = EnterBalance(out balance);
-            if(result)
+            if (result)
             {
                 string guid;
                 Core.Parking.Instanse.AddCar(CarType.Motorcycle, balance, out guid);
                 Console.WriteLine("Car was added sucesfully");
-                Console.WriteLine($"Car ID: {guid}");         
+                Console.WriteLine($"Car ID: {guid}");
             }
         }
 
@@ -206,6 +256,6 @@ namespace Parking
         }
         #endregion SecondMenuLevelMethods
 
-      
+
     }
 }

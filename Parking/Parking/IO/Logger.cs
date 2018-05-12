@@ -13,7 +13,7 @@ namespace Parking.IO
         private FileStream logFile;
         public Logger(string fileName)
         {
-            logFile = new FileStream(fileName, FileMode.CreateNew);
+            logFile = new FileStream(fileName, FileMode.OpenOrCreate);
         }
         public void WriteLog(double balance)
         {
@@ -35,16 +35,13 @@ namespace Parking.IO
 
         public void WriteException(string message, string fileName)
         {
-            if(String.IsNullOrEmpty(fileName))
-                using (StreamWriter writer = new StreamWriter(logFile.Name, true))
-                {
-                    writer.WriteLine($"{DateTime.Now.ToLongTimeString()}\tERR\t{message}");
-                }
-            else
-                using (StreamWriter writer = new StreamWriter(fileName, true))
-                {
-                    writer.WriteLine($"{DateTime.Now.ToLongTimeString()}\tERR\t{message}");
-                }
+            if (logFile.Name == fileName)
+                logFile.Unlock(0, logFile.Length);
+            using (StreamWriter writer = new StreamWriter(fileName, true))
+            {
+                writer.WriteLine($"{DateTime.Now.ToLongTimeString()}\tERR\t{message}");
+            }
+            logFile.Lock(0, logFile.Length);
         }
        
     }
