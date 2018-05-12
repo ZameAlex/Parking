@@ -61,7 +61,7 @@ namespace Parking.Core
 
         public override string ToString()
         {
-            return $"CarType: {Type.ToString()} Balance: {Balance}";
+            return $"CarType: {Type.ToString()}; Balance: {Balance}";
         }
 
     }

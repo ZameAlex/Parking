@@ -123,6 +123,7 @@ namespace Parking
 
         static void ShowHistory()
         {
+            Console.Clear();
             var transactions = Core.Parking.Instanse.ShowTransactions();
             foreach (var transaction in transactions)
             {
@@ -132,11 +133,13 @@ namespace Parking
 
         static void ShowBalance()
         {
+            Console.Clear();
             Console.WriteLine($"Total income: {Core.Parking.Instanse.ShowIncome(false)}");
         }
 
         static void ShowBalancePerMinute()
         {
+            Console.Clear();
             Console.WriteLine($"Income for last minute: {Core.Parking.Instanse.ShowIncome(true)}");
         }
 
@@ -148,6 +151,7 @@ namespace Parking
         }
         static void ShowLog()
         {
+            Console.Clear();
             Console.WriteLine(Core.Parking.Instanse.ShowLog());
         }
 
@@ -163,19 +167,19 @@ namespace Parking
             catch (ArgumentNullException ex)
             {
                 Console.WriteLine("Car didn`t find!");
-                logger.WriteException(ex.Message, null);
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             catch (NullReferenceException ex)
             {
                 Console.WriteLine("Car didn`t find!");
-                logger.WriteException(ex.Message, null);
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Car didn`t find!");
-                logger.WriteException(ex.Message, null);
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
         }
