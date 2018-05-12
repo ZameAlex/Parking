@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Parking.Core
 {
-    public sealed class Parking
+    public sealed class Parking: IDisposable
     {
         private static readonly Lazy<Parking> lazy = new Lazy<Parking>(() => new Parking());
         public static Parking Instanse { get { return lazy.Value; } }
@@ -235,8 +235,7 @@ namespace Parking.Core
             }
         }
 
-
-        ~Parking()
+        public void Dispose()
         {
             foreach (var item in carTimers)
                 item.Value.Dispose();

@@ -15,24 +15,31 @@ namespace Parking
         static Menu currentMenu;
         static void Main(string[] args)
         {
-            menus = new List<Menu>();
-            menus.Add(new Menu(BackSpaceMethodFirstLevel,
-                MenuMethods.AddCar, 
-                MenuMethods.DeleteCar,
-                MenuMethods.ShowCar, 
-                MenuMethods.AddMoney,
-                MenuMethods.ShowHistory,
-                MenuMethods.ShowBalance,
-                MenuMethods.ShowBalancePerMinute,
-                MenuMethods.ShowPlaces,
-                MenuMethods.ShowLog));
-            menus.Add(new Menu(BackSpaceMethodSecondLevel,
-                MenuMethods.Bus,
-                MenuMethods.Passenger,
-                MenuMethods.Motorcycle,
-                MenuMethods.Truck));
-            Menu currentMenu = menus.First();
-            currentMenu.Show();
+            try
+            {
+                menus = new List<Menu>();
+                menus.Add(new Menu(BackSpaceMethodFirstLevel,
+                    MenuMethods.AddCar,
+                    MenuMethods.DeleteCar,
+                    MenuMethods.ShowCar,
+                    MenuMethods.AddMoney,
+                    MenuMethods.ShowHistory,
+                    MenuMethods.ShowBalance,
+                    MenuMethods.ShowBalancePerMinute,
+                    MenuMethods.ShowPlaces,
+                    MenuMethods.ShowLog));
+                menus.Add(new Menu(BackSpaceMethodSecondLevel,
+                    MenuMethods.Bus,
+                    MenuMethods.Passenger,
+                    MenuMethods.Motorcycle,
+                    MenuMethods.Truck));
+                Menu currentMenu = menus.First();
+                currentMenu.Show();
+            }
+            finally
+            {
+                Core.Parking.Instanse.Dispose();
+            }
 
         }
         public static void BackSpaceMethodFirstLevel()
