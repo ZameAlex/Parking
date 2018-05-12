@@ -14,7 +14,7 @@ namespace Parking.IO
         {
             using (StreamWriter writer = new StreamWriter(logFile, true))
             {
-                writer.WriteLine($"{DateTime.Now.ToLongTimeString()} {balance}");
+                writer.WriteLine($"Time: {DateTime.Now.ToLongTimeString()}; Balance: {balance}");
             }
         }
 
@@ -23,7 +23,11 @@ namespace Parking.IO
             StringBuilder builder = new StringBuilder();
             using (StreamReader reader = new StreamReader(logFile))
             {
-                builder.Append(reader.ReadLine());
+                while (!reader.EndOfStream)
+                {
+                    builder.Append(reader.ReadLine());
+                    builder.Append('\n');
+                }
             }
             return builder.ToString();
         }

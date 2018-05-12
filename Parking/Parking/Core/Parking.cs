@@ -146,11 +146,9 @@ namespace Parking.Core
         public double ShowIncome(bool minute)
         {
             if (minute)
-                return Balance;
-            else
-            {
                 return MinuteIncomeCalculate();
-            }
+            else
+                return Balance;
         }
 
         private double MinuteIncomeCalculate()
@@ -211,19 +209,19 @@ namespace Parking.Core
 
         private void Log(object obj)
         { 
-            double balance=0;
-            foreach (var t in transactionsForLogging)
+            double balance = 0;
+            foreach (var t in transactions)
                 balance += t.Tax;
-            Logger.WriteLog(balance, settings.logPath);
+           Logger.WriteLog(balance, settings.logPath);
         }
 
         private void DeleteOldTransaction(object obj)
         {
             try
             {
-                for (int counter = transactions.Count - 1; counter > 0; counter--)
+                for (int counter = 0; counter < transactions.Count; counter++)
                 {
-                    if (transactions[counter].TransactionTime < DateTime.Now.AddMinutes(-1))
+                    if (transactions[counter].TransactionTime < DateTime.Now.AddSeconds(-settings.logTimeout))
                         transactions.RemoveAt(counter);
                     else
                         break;

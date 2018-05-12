@@ -118,6 +118,7 @@ namespace Parking.IO
 
         public static void ShowPlaces()
         {
+            Console.Clear();
             Console.WriteLine($@"Places:\nTotal: { Core.Parking.Instanse.TotalPlaces()},
                                 Free: { Core.Parking.Instanse.FreePlaces()},
                                  Occupied: {  Core.Parking.Instanse.OccupiedPlaces()}");
