@@ -30,13 +30,14 @@ namespace Parking.Core
         /// <param name="type">CarType</param>
         /// <param name="Guid">Returns ID of new Car</param>
         /// <returns>True, if car was added suceesful, false, if parking space is not enough</returns>
-        public bool AddCar(CarType type, out string Guid)
+        public bool AddCar(CarType type,double balance, out string Guid)
         {
             try
             {
                 if (settings.ParkingSpace > cars.Count)
                 {
                     var tempCar = new Car(type);
+                    tempCar.AddMoney(balance);
                     Guid = tempCar.ID;
                     cars.Add(tempCar);
 
@@ -90,7 +91,7 @@ namespace Parking.Core
                 carForAddMoney.AddMoney(money);
                 return true;
             }
-            catch (Exception ex)
+            catch (ArgumentNullException ex)
             {
                 throw;
             }
@@ -113,28 +114,33 @@ namespace Parking.Core
             return settings.TaxesForCarType[car.Type.ToString()];
         }
 
-        public void ShowTransactions()
+        public List<Transaction> ShowTransactions()
         {
-            foreach(var transaction in transactions)
-            {
-                Console.WriteLine($"Date: {transaction.TransactionTime}, Car: {transaction.CarID}, Tax: {transaction.Tax}");
-            }
+            return transactions;
         }
 
-        public void ShowPlaces()
+        public int TotalPlaces()
         {
-            Console.WriteLine($@"Places:\nTotal: { settings.ParkingSpace},
-                                Free: { settings.ParkingSpace - cars.Count},
-                                Ocupated: { cars.Count}");
+            return settings.ParkingSpace;
         }
 
-        public void ShowIncome(bool minute)
+        public int FreePlaces()
         {
-            if(minute)
-                Console.WriteLine($"Total income: {Balance}");
+            return settings.ParkingSpace - cars.Count;
+        }
+
+        public int OccupiedPlaces()
+        {
+            return cars.Count;
+        }
+
+        public double ShowIncome(bool minute)
+        {
+            if (minute)
+                return Balance;
             else
             {
-                Console.WriteLine($"Income for last minute: {MinuteIncomeCalculate()}");
+                return MinuteIncomeCalculate();
             }
         }
 
@@ -146,6 +152,11 @@ namespace Parking.Core
                 income += transaction.Tax;
             }
             return income;
+        }
+
+        public string ShowLog()
+        {
+            return null;
         }
     }
 }
