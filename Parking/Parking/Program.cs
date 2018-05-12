@@ -13,11 +13,11 @@ namespace Parking
     {
         static List<Menu> menus;
         static Menu currentMenu;
+        static Logger logger;
         static void Main(string[] args)
         {
             menus = new List<Menu>();
-            
-
+            logger = new Logger("Parking.log");
             menus.Add(new Menu(BackSpaceMethodFirstLevel, AddCar, DeleteCar, AddMoney, ShowHistory, ShowBalance, ShowBalancePerMinute, ShowPlaces, ShowLog));
             menus.Add(new Menu(BackSpaceMethodSecondLevel, Bus, Passenger,Motorcycle,Truck));
             Menu currentMenu = menus.First();
@@ -64,7 +64,7 @@ namespace Parking
             catch (Exception ex)
             {
                 Console.WriteLine("Car wasn`t deleted!");
-                //logger
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             Console.WriteLine("Car was removed succesfuly");
@@ -95,7 +95,7 @@ namespace Parking
             catch (Exception ex)
             {
                 Console.WriteLine("Car didn`t find!");
-                //logger
+                logger.WriteException(ex.Message, "Parking.log");
                 return;
             }
             Console.WriteLine("Money was added succesfuly");
@@ -129,7 +129,7 @@ namespace Parking
         }
         static void ShowLog()
         {
-            Core.Parking.Instanse.ShowLog();
+            Console.WriteLine(Core.Parking.Instanse.ShowLog());
         }
         #endregion FirstMenuLevelMethods
 

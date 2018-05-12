@@ -18,5 +18,10 @@ namespace Parking.Core
             Tax = tax;
             transacionTime = DateTime.Now;
         }
+
+        public override string ToString()
+        {
+            return $"Time: {TransactionTime}, Car: {CarID}, Tax: {Tax}\n";
+        }
     }
 }
