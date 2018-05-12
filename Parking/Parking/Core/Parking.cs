@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace Parking.Core
 {
-    public sealed class Parking
+    public sealed class Parking: IDisposable
     {
         private static readonly Lazy<Parking> lazy = new Lazy<Parking>(() => new Parking());
         public static Parking Instanse { get { return lazy.Value; } }
 
         private readonly Settings settings;
-        Logger logger;
 
         private List<Car> cars;
         private Dictionary<Car, Timer> carTimers;
@@ -35,16 +34,12 @@ namespace Parking.Core
             transactions = new List<Transaction>();
             transactionsForLogging = new List<Transaction>();
             carTimers = new Dictionary<Car, Timer>();
-            logger = new Logger("Transactions.log");
-            logTimer = new Timer(Log, null, 60000, 60000);
-            deleteOldTransactionsTimer = new Timer(DeleteOldTransaction, null, 61000, 1000);
+            logTimer = new Timer(Log, null, settings.logTimeout*1000, settings.logTimeout*1000);
+            deleteOldTransactionsTimer = new Timer(DeleteOldTransaction, null, (settings.logTimeout+1)*1000, 1000);
         }
-        /// <summary>
-        /// If ParkingSpace>cars.Count, we can add car
-        /// </summary>
-        /// <param name="type">CarType</param>
-        /// <param name="Guid">Returns ID of new Car</param>
-        /// <returns>True, if car was added suceesful, false, if parking space is not enough</returns>
+
+
+
         public bool AddCar(CarType type, double balance, out string Guid)
         {
             try
@@ -62,18 +57,13 @@ namespace Parking.Core
                 Guid = null;
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Guid">ID of the target car to remove it</param>
-        /// <param name="balance">returns true, if balance is more than 0, due to know, what the reason of false</param>
-        /// <returns>True, if remove was succeded, falce, if balance is not enough</returns>
-        /// <exception>Can throw ArgumentNullException, if car was not found</exception>
+
+
         public bool RemoveCar(string Guid)
         {
             try
@@ -89,27 +79,30 @@ namespace Parking.Core
                 else
                     return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
-        /// <summary>
-        /// Add sum to balance car
-        /// </summary>
-        /// <param name="Guid">Id of car</param>
-        /// <param name="money">Sum, what you want to add</param>
-        /// <returns></returns>
-        /// <exception>Can throw ArgumentNullException, if car was not found</exception>
-        public bool AddBalance(string Guid, double money)
+
+
+        public void AddBalance(string Guid, double money)
         {
             try
             {
                 var carForAddMoney = cars.Find(car => car.ID == Guid);
-                carForAddMoney.AddMoney(money);
-                return true;
+                if (carForAddMoney.Fine > 0)
+                {
+                    Transaction transaction;
+                    carForAddMoney.PayFine(money, out transaction);
+                    Balance += transaction.Tax;
+                    transactions.Add(transaction);
+                }
+                else
+                    carForAddMoney.AddMoney(money);
+                
             }
-            catch (ArgumentNullException ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -117,9 +110,15 @@ namespace Parking.Core
 
         private double CalculateTax(Car car)
         {
-            if (Balance < 0)
-                return settings.Fine * settings.TaxesForCarType[car.Type.ToString()];
-            return settings.TaxesForCarType[car.Type.ToString()];
+            try
+            { if (car.Balance < 0 || car.Balance < settings.TaxesForCarType[car.Type.ToString()])
+                    return settings.Fine * settings.TaxesForCarType[car.Type.ToString()];
+                return settings.TaxesForCarType[car.Type.ToString()];
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
         }
 
         #region ShowMethods
@@ -147,11 +146,9 @@ namespace Parking.Core
         public double ShowIncome(bool minute)
         {
             if (minute)
-                return Balance;
-            else
-            {
                 return MinuteIncomeCalculate();
-            }
+            else
+                return Balance;
         }
 
         private double MinuteIncomeCalculate()
@@ -166,8 +163,22 @@ namespace Parking.Core
 
         public string ShowLog()
         {
-            return logger.ReadLog();
+            return Logger.ReadLog(settings.logPath);
         }
+
+        public string ShowCar(string Guid)
+        {
+            try
+            {
+                var carForDisplay = cars.Find(car => car.ID == Guid);
+                return carForDisplay.ToString();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         #endregion ShowMethods
 
 
@@ -176,38 +187,53 @@ namespace Parking.Core
             try
             {
                 var car = obj as Car;
-                Transaction transaction;
                 var tax = CalculateTax(car);
-                car.Pay(CalculateTax(car), out transaction);
-                Balance += tax;
-                transactions.Add(transaction);
+                if (tax > car.Balance)
+                {
+                    car.Fine += tax;
+                }
+                else
+                {
+                    Transaction transaction;
+                    car.Pay(CalculateTax(car), out transaction);
+                    Balance += transaction.Tax;
+                    transactions.Add(transaction);
+                }
+                
             }
             catch (Exception ex)
             {
-                logger.WriteException(ex.Message, "Parking.log");
+                Logger.WriteException(ex.Message, "Parking.log");
             }
         }
 
         private void Log(object obj)
         { 
-            double balance=0;
-            foreach (var t in transactionsForLogging)
+            double balance = 0;
+            foreach (var t in transactions)
                 balance += t.Tax;
-            logger.WriteLog(balance);
+           Logger.WriteLog(balance, settings.logPath);
         }
 
         private void DeleteOldTransaction(object obj)
         {
-            for(int counter = transactions.Count-1;counter>0;counter--)
+            try
             {
-                if (transactions[counter].TransactionTime < DateTime.Now.AddMinutes(-1))
-                    transactions.RemoveAt(counter);
-                else
-                    break;
+                for (int counter = 0; counter < transactions.Count; counter++)
+                {
+                    if (transactions[counter].TransactionTime < DateTime.Now.AddSeconds(-settings.logTimeout))
+                        transactions.RemoveAt(counter);
+                    else
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteException(ex.Message, "Parking.log");
             }
         }
 
-        ~Parking()
+        public void Dispose()
         {
             foreach (var item in carTimers)
                 item.Value.Dispose();

@@ -19,6 +19,7 @@ namespace Parking.Core
         public string ID { get; protected set; }
         public double Balance { get; protected set; }
         public CarType Type { get; protected set; }
+        public double Fine { get; set; }
 
         public Car(CarType type)
         {
@@ -35,11 +36,32 @@ namespace Parking.Core
                 Balance += value;
         }
 
-        public void Pay(double tax,out Transaction transaction)
+        public void Pay(double tax, out Transaction transaction)
         {
-            
             Balance -= tax;
             transaction = new Transaction(ID, tax);
+        }
+
+        public void PayFine(double money,out Transaction transaction)
+        {
+            double balance = 0;
+            if (Fine > money)
+            {
+                Fine -= money;
+                balance += money;
+            }
+            else
+            {
+                balance += Fine;
+                AddMoney(money - Fine);
+                Fine = 0;
+            }
+            transaction = new Transaction(ID, balance);
+        }
+
+        public override string ToString()
+        {
+            return $"CarType: {Type.ToString()}; Balance: {Balance}";
         }
 
     }

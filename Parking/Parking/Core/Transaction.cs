@@ -21,7 +21,7 @@ namespace Parking.Core
 
         public override string ToString()
         {
-            return $"Time: {TransactionTime}, Car: {CarID}, Tax: {Tax}\n";
+            return $"Time: {TransactionTime}; Car: {CarID}; Tax: {Tax}\n";
         }
     }
 }
